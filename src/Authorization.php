@@ -101,6 +101,14 @@ class Authorization {
     }
     
     /**
+     * Devuelve las credenciales del usuario logueado
+     * @return UserCredentials
+     */
+    public function getUserCredentials() {
+        return $this->_user_logged;
+    }
+    
+    /**
      * Autentifica y devuelve las credencials del usuario en base al token recibido
      * @param string $token Token único de la sesión activa del usuario
      */
@@ -248,19 +256,20 @@ class Authorization {
     public function sector(SectorCredentials $sector) {
         //LOGIN REQUIRED
         if ( $sector->require_level > 0 && !$this->isLogged() ) {
-            throw new AuthorizationException('sector_require_user', 4);
+            throw new AuthorizationException('sector_require_login', 4);
         }
         
-        //AUTHORIZED SECTOR
-        if ( $this->_user_logged->allowed_sectors && !in_array($sector->name, $this->_user_logged->allowed_sectors) ) {
-            throw new AuthorizationException('sector_require_access', 2, ['user_allowed_sectors' => $this->_user_logged->allowed_sectors]);
+        if ( $this->isLogged() ) {
+            //AUTHORIZED SECTOR
+            if ( $this->_user_logged->allowed_sectors && !in_array($sector->name, $this->_user_logged->allowed_sectors) ) {
+                throw new AuthorizationException('sector_require_access', 2, ['user_allowed_sectors' => $this->_user_logged->allowed_sectors]);
+            }
+
+            //AUTHORIZED LEVEL SECTOR
+            if ( $sector->require_level && $this->_user_logged->access_level < $sector->require_level ) {
+                throw new AuthorizationException('sector_require_access', 5, ['user_access_level' => $this->_user_logged->access_level]);
+            }
         }
-        
-        //AUTHORIZED LEVEL SECTOR
-        if ( $sector->require_level && $this->_user_logged->access_level < $sector->require_level ) {
-            throw new AuthorizationException('sector_require_access', 5, ['user_access_level' => $this->_user_logged->access_level]);
-        }
-        
         //AJAX_MODE
         $http_request = filter_input(INPUT_SERVER, 'HTTP_X_REQUESTED_WITH', FILTER_SANITIZE_STRING);
         $ajax_request = ( !empty($http_request) && strtolower($http_request) == 'xmlhttprequest' ) ? TRUE : FALSE;
