@@ -6,7 +6,7 @@ define('DS', DIRECTORY_SEPARATOR);
 require ROOT . DS . 'vendor' . DS . 'autoload.php';
 
 $auth = new PowerOn\Authorization\Authorization([
-    'db_pdo' => new PDO(sprintf('mysql:host=%s;dbname=%s', 'localhost', 'cncdata'), 'root', 'marcos6745'),
+    'db_pdo' => new PDO(sprintf('mysql:host=%s;dbname=%s', 'localhost', 'data'), 'root', ''),
     'password_min_length' => 3
 ]);
 
