@@ -1,9 +1,9 @@
 {
-    "name": "poweronsystem/helperservice",
+    "name": "poweronsystem/authorizationservice",
     "type": "library",
-    "description": "Servicio de ayudantes en la escritura html.",
-    "keywords": ["helper", "html writer", "html easy"],
-    "homepage": "https://github.com/poweronsystem/helperservice",
+    "description": "Servicio de autorizacion de usuarios y sectores.",
+    "keywords": ["auth", "login", "user"],
+    "homepage": "https://github.com/poweronsystem/authorizationservice",
     "license": "GPL",
     "authors": [
         {
@@ -15,21 +15,16 @@
     ],
     "require": {
         "php": ">=5.4",
-        "poweronsystem/webutility": "^0.1.0",
-        "pimple/pimple": "^3.0"
+        "fightbulc/moment": "^1.26",
+        "poweronsystem/validationservice": "^0.1.0",
+        "poweronsystem/webutility": "^0.1.0"
     },
     "require-dev": {
         "kint-php/kint": "^2.1"
     },
     "autoload": {
         "psr-4": {
-            "PowerOn\\Helper\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "App\\": "test"
+            "PowerOn\\Authorization\\": "src"
         }
     }
-    
 }

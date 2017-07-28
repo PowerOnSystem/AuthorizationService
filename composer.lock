@@ -4,38 +4,32 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "9ac269db5010303fc471af2f6388146f",
+    "content-hash": "83edb135c38c55f874c5726fdb057234",
     "packages": [
         {
-            "name": "pimple/pimple",
-            "version": "v3.2.0",
+            "name": "fightbulc/moment",
+            "version": "1.26.9",
             "source": {
                 "type": "git",
-                "url": "https://github.com/silexphp/Pimple.git",
-                "reference": "729436408ef52f9845f9b60d60b2563f314bf1a9"
+                "url": "https://github.com/fightbulc/moment.php.git",
+                "reference": "8d164a2101e45bf1a8208ddfb3a15313f764a0f8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/silexphp/Pimple/zipball/729436408ef52f9845f9b60d60b2563f314bf1a9",
-                "reference": "729436408ef52f9845f9b60d60b2563f314bf1a9",
+                "url": "https://api.github.com/repos/fightbulc/moment.php/zipball/8d164a2101e45bf1a8208ddfb3a15313f764a0f8",
+                "reference": "8d164a2101e45bf1a8208ddfb3a15313f764a0f8",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0",
-                "psr/container": "^1.0"
+                "php": ">=5.3.0"
             },
             "require-dev": {
-                "symfony/phpunit-bridge": "^3.2"
+                "phpunit/phpunit": "4.2.*"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.2.x-dev"
-                }
-            },
             "autoload": {
-                "psr-0": {
-                    "Pimple": "src/"
+                "psr-4": {
+                    "Moment\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -44,17 +38,85 @@
             ],
             "authors": [
                 {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
+                    "name": "Ashish Tilara",
+                    "email": "ashish@itcutives.com",
+                    "role": "developer"
+                },
+                {
+                    "name": "Jaroslaw Kozak",
+                    "email": "jaroslaw.kozak68@gmail.com",
+                    "role": "developer"
+                },
+                {
+                    "name": "Tino Ehrich",
+                    "email": "tino@bigpun.me",
+                    "role": "developer"
                 }
             ],
-            "description": "Pimple, a simple Dependency Injection Container",
-            "homepage": "http://pimple.sensiolabs.org",
+            "description": "Parse, validate, manipulate, and display dates in PHP w/ i18n support. Inspired by moment.js",
             "keywords": [
-                "container",
-                "dependency injection"
+                "date",
+                "display",
+                "format",
+                "i18n",
+                "locale",
+                "manipulate",
+                "moment",
+                "parse",
+                "time",
+                "translation",
+                "validate"
             ],
-            "time": "2017-07-17T17:05:21+00:00"
+            "time": "2017-07-22T07:37:47+00:00"
+        },
+        {
+            "name": "poweronsystem/validationservice",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PowerOnSystem/ValidationService.git",
+                "reference": "5d435505c920f6f4b1bcf57d9e3696690b390792"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PowerOnSystem/ValidationService/zipball/5d435505c920f6f4b1bcf57d9e3696690b390792",
+                "reference": "5d435505c920f6f4b1bcf57d9e3696690b390792",
+                "shasum": ""
+            },
+            "require": {
+                "fightbulc/moment": "^1.26",
+                "php": ">=5.4",
+                "poweronsystem/webutility": "^0.1.0"
+            },
+            "require-dev": {
+                "kint-php/kint": "^2.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PowerOn\\Validation\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL"
+            ],
+            "authors": [
+                {
+                    "name": "Lucas Sosa",
+                    "email": "sosalucas87@gmail.com",
+                    "homepage": "http://www.poweronsistemas.com.ar",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Servicio de validacion de campos universal.",
+            "homepage": "https://github.com/poweronsystem/validationservice",
+            "keywords": [
+                "validation",
+                "validation rules",
+                "validator"
+            ],
+            "time": "2017-07-20T12:13:07+00:00"
         },
         {
             "name": "poweronsystem/webutility",
@@ -103,55 +165,6 @@
                 "utilities"
             ],
             "time": "2017-07-20T12:18:18+00:00"
-        },
-        {
-            "name": "psr/container",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-fig/container.git",
-                "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/container/zipball/b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
-                "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Psr\\Container\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "PHP-FIG",
-                    "homepage": "http://www.php-fig.org/"
-                }
-            ],
-            "description": "Common Container Interface (PHP FIG PSR-11)",
-            "homepage": "https://github.com/php-fig/container",
-            "keywords": [
-                "PSR-11",
-                "container",
-                "container-interface",
-                "container-interop",
-                "psr"
-            ],
-            "time": "2017-02-14T16:28:37+00:00"
         }
     ],
     "packages-dev": [
