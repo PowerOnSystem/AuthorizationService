@@ -4,7 +4,7 @@ Servicio de autorización de usuarios, inicio, cierre, pausa y resumen de sesió
 
 ## Instalación vía Composer
 
-Podés instalar WebTable vía
+Podés instalar AuthorizationService vía
 [Composer](https://getcomposer.org)  a través de la consola:
 
 ``` bash
