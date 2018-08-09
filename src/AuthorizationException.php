@@ -17,7 +17,6 @@
  */
 namespace PowerOn\Authorization;
 
-use PowerOn\Utility\Lang;
 /**
  * AuthorizerException
  * @author Lucas Sosa
@@ -32,17 +31,14 @@ class AuthorizationException extends \Exception {
     
     /**
      * Crea una excepción de tipo authorization
-     * @param string $name Nombre del error para traducir
+     * @param string $message Nombre del error para traducir
      * @param integer $code Código de error
      * @param array $context Información adicional del error
      */
-    public function __construct($name, $code, array $context = []) {
-        Lang::configure(Lang::STRICT_MODE);
-        Lang::load('authorization', NULL, dirname(dirname(__FILE__)). DIRECTORY_SEPARATOR . 'langs');
-        
+    public function __construct($message, $code, array $context = []) {
         $this->_context = $context;
         
-        parent::__construct(Lang::get('authorization.' . $name), $code);
+        parent::__construct($message, $code);
     }
     
     /**

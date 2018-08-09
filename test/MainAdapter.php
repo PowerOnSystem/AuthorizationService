@@ -48,7 +48,7 @@ class MainAdapter implements AuthorizationAdapterInterface {
         ]);
         
         $credentials->setUserAccessLevel(5);
-        
+
         return $credentials;
     }
 

@@ -195,8 +195,11 @@ class Authorization {
             
             if ( $loginCountTime > time() ) {
                 throw new AuthorizationException(
-                    sprintf('login_error_max_chances', $this->config['login_error_max_chances']), 3,
-                    ['seconds' => $loginCountTime]
+                    sprintf(
+                        'Superó el máximo de (%d) intentos de inicio de sesión, deberá esperar (%d segundos) para volver a intentarlo.',
+                        $this->config['login_error_max_chances'],
+                        $loginCountTime - time()
+                    ), 3, [$loginCountTime - time()]
                 );
             } else {
                 Session::remove('login_count_time');
@@ -217,13 +220,20 @@ class Authorization {
                 : $this->config['login_error_max_chances']
             );
             $this->status = self::AUTH_STATUS_USER_NOT_FOUND;
-            throw new AuthorizationException('user_not_found', 2, ['chances' => Session::read('login_count')]);
+            throw new AuthorizationException(
+                'El usuario o la contraseña son inválidos.', 
+                2, 
+                ['chances' => Session::read('login_count')]
+            );
         }
         
         if ( $this->config['login_check_ban'] ) {
             if ( $userCredentials->banned ) {
                 $this->status = self::AUTH_STATUS_USER_ERROR;
-                throw new AuthorizationException('banned_account', 10);
+                throw new AuthorizationException(
+                    'Su cuenta se encuentra bloqueada, comuníquese con un administrador.',
+                    10
+                );
             }
         }
         $userCredentials->setSessionStartTime(time());
