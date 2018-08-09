@@ -4,132 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "83edb135c38c55f874c5726fdb057234",
+    "content-hash": "1170aabf9b4f46caba23a61f0215b50c",
     "packages": [
         {
-            "name": "fightbulc/moment",
-            "version": "1.26.9",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/fightbulc/moment.php.git",
-                "reference": "8d164a2101e45bf1a8208ddfb3a15313f764a0f8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/fightbulc/moment.php/zipball/8d164a2101e45bf1a8208ddfb3a15313f764a0f8",
-                "reference": "8d164a2101e45bf1a8208ddfb3a15313f764a0f8",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "4.2.*"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Moment\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Ashish Tilara",
-                    "email": "ashish@itcutives.com",
-                    "role": "developer"
-                },
-                {
-                    "name": "Jaroslaw Kozak",
-                    "email": "jaroslaw.kozak68@gmail.com",
-                    "role": "developer"
-                },
-                {
-                    "name": "Tino Ehrich",
-                    "email": "tino@bigpun.me",
-                    "role": "developer"
-                }
-            ],
-            "description": "Parse, validate, manipulate, and display dates in PHP w/ i18n support. Inspired by moment.js",
-            "keywords": [
-                "date",
-                "display",
-                "format",
-                "i18n",
-                "locale",
-                "manipulate",
-                "moment",
-                "parse",
-                "time",
-                "translation",
-                "validate"
-            ],
-            "time": "2017-07-22T07:37:47+00:00"
-        },
-        {
-            "name": "poweronsystem/validationservice",
-            "version": "v0.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/PowerOnSystem/ValidationService.git",
-                "reference": "5d435505c920f6f4b1bcf57d9e3696690b390792"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/PowerOnSystem/ValidationService/zipball/5d435505c920f6f4b1bcf57d9e3696690b390792",
-                "reference": "5d435505c920f6f4b1bcf57d9e3696690b390792",
-                "shasum": ""
-            },
-            "require": {
-                "fightbulc/moment": "^1.26",
-                "php": ">=5.4",
-                "poweronsystem/webutility": "^0.1.0"
-            },
-            "require-dev": {
-                "kint-php/kint": "^2.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "PowerOn\\Validation\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL"
-            ],
-            "authors": [
-                {
-                    "name": "Lucas Sosa",
-                    "email": "sosalucas87@gmail.com",
-                    "homepage": "http://www.poweronsistemas.com.ar",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Servicio de validacion de campos universal.",
-            "homepage": "https://github.com/poweronsystem/validationservice",
-            "keywords": [
-                "validation",
-                "validation rules",
-                "validator"
-            ],
-            "time": "2017-07-20T12:13:07+00:00"
-        },
-        {
             "name": "poweronsystem/webutility",
-            "version": "v0.1.0",
+            "version": "v0.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PowerOnSystem/WebUtility.git",
-                "reference": "d9981d801bb0b25e34fd5225472e7fc2caeab1b6"
+                "reference": "c15a6f3d1268cdf31d24d7825cde5d366caeb23b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PowerOnSystem/WebUtility/zipball/d9981d801bb0b25e34fd5225472e7fc2caeab1b6",
-                "reference": "d9981d801bb0b25e34fd5225472e7fc2caeab1b6",
+                "url": "https://api.github.com/repos/PowerOnSystem/WebUtility/zipball/c15a6f3d1268cdf31d24d7825cde5d366caeb23b",
+                "reference": "c15a6f3d1268cdf31d24d7825cde5d366caeb23b",
                 "shasum": ""
             },
             "require": {
@@ -164,22 +52,22 @@
                 "string formatter",
                 "utilities"
             ],
-            "time": "2017-07-20T12:18:18+00:00"
+            "time": "2018-08-09T11:45:51+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "kint-php/kint",
-            "version": "2.1.2",
+            "version": "2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kint-php/kint.git",
-                "reference": "1a1104729f10277b06d7db742d3c98d1881d4d7e"
+                "reference": "b091715eadaf6e1a7ef927f3e81d1004611d2aea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kint-php/kint/zipball/1a1104729f10277b06d7db742d3c98d1881d4d7e",
-                "reference": "1a1104729f10277b06d7db742d3c98d1881d4d7e",
+                "url": "https://api.github.com/repos/kint-php/kint/zipball/b091715eadaf6e1a7ef927f3e81d1004611d2aea",
+                "reference": "b091715eadaf6e1a7ef927f3e81d1004611d2aea",
                 "shasum": ""
             },
             "require": {
@@ -224,7 +112,56 @@
                 "kint",
                 "php"
             ],
-            "time": "2017-07-03T20:08:05+00:00"
+            "time": "2017-09-06T17:46:03+00:00"
+        },
+        {
+            "name": "poweronsystem/databaseservice",
+            "version": "v0.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PowerOnSystem/DataBaseService.git",
+                "reference": "13e2490e142992a19059c50bf63e437b6a96adf8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PowerOnSystem/DataBaseService/zipball/13e2490e142992a19059c50bf63e437b6a96adf8",
+                "reference": "13e2490e142992a19059c50bf63e437b6a96adf8",
+                "shasum": ""
+            },
+            "require": {
+                "poweronsystem/webutility": "^0.1.0"
+            },
+            "require-dev": {
+                "kint-php/kint": "^2.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PowerOn\\Database\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL"
+            ],
+            "authors": [
+                {
+                    "name": "Lucas Sosa",
+                    "email": "sosalucas87@gmail.com",
+                    "homepage": "http://www.poweronsistemas.com.ar",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Database service.",
+            "homepage": "https://github.com/poweronsystem/databaseservice",
+            "keywords": [
+                "database",
+                "mysql",
+                "orm",
+                "pdo",
+                "sql"
+            ],
+            "time": "2018-07-27T18:33:08+00:00"
         }
     ],
     "aliases": [],

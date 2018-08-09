@@ -16,26 +16,56 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 namespace PowerOn\Authorization;
-use Moment\Moment;
+use PowerOn\Utility\Session;
 
 /**
  * Authorizer
  * Maneja la autorizacion de acceso al sistema
- * @author Lucas Sosa
- * @version 0.1
+ * @author Lucas Sosa <sosalucas87@gmail.com>
+ * @version 0.1.2
  */
 class Authorization {
     /**
      * Configuración del autorizador
      * @var array
      */
-    public $_config = [];
-        
+    private $config = [];    
     /**
      * Credenciales del usuario logueado
      * @var UserCredentials
      */
-    private $_user_logged = NULL;
+    private $userCredentials = NULL;
+    /**
+     * Credenciales del sector verificado
+     * @var SectorCredentials
+     */
+    private $sectorCredentials = NULL;
+    /**
+     * Adaptador de inicio de sesión
+     * @var AuthorizationAdapterInterface
+     */
+    private $adapter;
+    /**
+     * Permisos de sectores
+     * @var array
+     */
+    private $permissions;
+    /**
+     * Estado de autorización
+     * @var string
+     */
+    private $status = 'user_not_found';
+    
+    const AUTH_STATUS_OK = 'ok';
+    const AUTH_STATUS_PAUSED = 'paused';
+    const AUTH_STATUS_USER_ERROR = 'user_error';
+    const AUTH_STATUS_USER_NOT_FOUND = 'user_not_found';
+    const AUTH_STATUS_USER_SESSION_END = 'user_session_end';
+    const AUTH_STATUS_USER_SESSION_INACTIVE = 'user_session_inactive';
+    
+    const AUTH_STATUS_SECTOR_LOW_ACCESS_LEVEL = 'sector_low_access_level';
+    const AUTH_STATUS_SECTOR_NOT_ALLOWED = 'sector_not_allowed';    
+    
     /**
      * Crea una nueva autorización
      * @param array $config Configuración del autorizador
@@ -44,60 +74,61 @@ class Authorization {
      * <tr><td>login_error_max_chances</td><td>(int) 5</td> <td>Cantidad de veces que se puede equivocar en el inicio de sesión</td></tr>
      * <tr><td>login_error_wait_time</td><td>(int) 60</td> <td>Segundos que debe esperar antes de volver a intentar iniciar sesión 
      * luego de exceder el límite de errores</td></tr>
-     * <tr><td>login_check_ban</td><td>(bool) FALSE</td> <td>Habilita la verificación de usuario baneado, se deben especificar los parámetros
-     * <i>db_field_banned</i> y <i>db_field_banned_date</i></td></tr>
-     * <tr><td>login_session_time</td><td>(int) 3600</td> <td>Cantidad de segundos que dura una sesóin</td></tr>
-     * <tr><td colspan=3 align=center>Validaciones de campos</td></tr>
-     * <tr><td>password_min_length</td><td>(int) 5</td> <td>Cantidad de caracteres mínimos del campo password</td></tr>
-     * <tr><td>password_max_length</td><td>(int) 150</td> <td>Cantidad de caracteres máximos del campo password</td></tr>
-     * <tr><td>username_min_length</td><td>(int) 4</td> <td>Cantidad de caracteres mínimos del campo username</td></tr>
-     * <tr><td>username_max_length</td><td>(int) 40</td> <td>Cantidad de caracteres máximos del campo username</td></tr>
-     * <tr><td>access_level_min_val</td><td>(int) 1</td> <td>Rango de valores mínimo del nivel de acceso</td></tr>
-     * <tr><td>access_level_max_val</td><td>(int) 1</td> <td>Rango de valores máximo del nivel de acceso</td></tr>
-     * <tr><td colspan=3 align=center>Base de datos</td></tr>
-     * <tr><td>db_pdo</td><td>(\PDO instance) NULL</td> <td>Instancia del servicio PDO para la conexión de la base de datos</td></tr>
-     * <tr><td>db_table_users</td><td>(string) users</td> <td>Nombre de la tabla que contiene los usuarios</td></tr>
-     * <tr><td>db_field_id</td><td>(string) id</td> <td>Nombre de la clave principal de la tabla users</td></tr>
-     * <tr><td>db_user_mail</td><td>(string) username</td> <td>Nombre del campo username de la tabla users</td></tr>
-     * <tr><td>db_user_password</td><td>(string) password</td> <td>Nombre del campo password de la tabla users</td></tr>
-     * <tr><td>db_user_access_level</td><td>(string) access_level</td> <td>Nombre del campo access_level de la tabla users</td></tr>
-     * <tr><td>db_user_banned</td><td>(string) banned</td> <td>Nombre del campo banned de la tabla users</td></tr>
-     * <tr><td>db_user_banned_date</td><td>(string) banned_date</td> <td>Nombre del campo banned_date de la tabla users</td></tr>
-     * <tr><td>db_user_token</td><td>(string) token</td> <td>Nombre del campo token de la tabla users</td></tr>
-     * <tr><td>db_user_token_time</td><td>(string) token_time</td> <td>Nombre del campo token_time de la tabla users</td></tr>
-     * <tr><td>crypt_password</td><td>(string)</td> <td>Nombre de la clave principal de la tabla users</td></tr>
+     * <tr><td>login_check_ban</td><td>(bool) FALSE</td> <td>Habilita la verificación de usuario baneado</td></tr>
+     * <tr><td>login_session_time</td><td>(int) 3600</td> <td>Cantidad de segundos que dura una sesión</td></tr>
+     * <tr><td>login_session_inactive_time</td><td>(int) 1800</td> <td>Cantidad de segundos que dura una sesión</td></tr>
      * </table>
      * 
      */
-    public function __construct( array $config = [] ) {
-        $this->_config = $config + [            
+    public function __construct( array $config = [], array $permissions = []) {
+        $this->config = $config + [            
             'login_email_mode' => FALSE,
             'login_error_max_chances' => 5,
             'login_error_wait_time' => 60,
             'login_check_ban' => FALSE,
             'login_session_time' => 3600,
-
-            'password_min_length' => 5,
-            'password_max_length' => 150,
-            'username_min_length' => 4,
-            'username_max_length' => 40,
-            
-            'access_level_min_val' => 1,
-            'access_level_max_val' => 10,
-            
-            'db_pdo' => NULL,
-            'db_table_users' => 'users',            
-            'db_field_id' => 'id',
-            'db_field_user_mail' => 'username',
-            'db_field_password' => 'password',
-            'db_field_access_level' => 'access_level',
-            'db_field_banned' => 'banned',
-            'db_field_banned_date' => 'banned_date',
-            'db_field_token' => 'token',
-            'db_field_token_time' => 'token_time',
-            
-            'crypt_password' => '189OP02bbf23gt780b25bf252dj8901h9'
+            'login_session_inactive_time' => 1800
         ];
+
+        $this->permissions = $permissions;
+        
+        if ( Session::exist('AuthUser') ) {
+            $this->userCredentials = new UserCredentials();
+            $this->userCredentials->setUserData(Session::read('AuthUser.data'));
+            $this->userCredentials->setCredentialProperties(Session::read('AuthUser.credentials'));
+            
+            if ( !$this->userCredentials->isVerified() ) {
+                $this->status = self::AUTH_STATUS_USER_ERROR;
+            } else if ( $this->config['login_session_time'] && $this->config['login_session_time'] < $this->userCredentials->getSessionTime() ) {
+                $this->status = self::AUTH_STATUS_USER_SESSION_END;
+            } else if ( $this->config['login_session_inactive_time'] 
+                    && $this->config['login_session_inactive_time'] < $this->userCredentials->getSessionInactiveTime() ) {
+                $this->status = self::AUTH_STATUS_USER_SESSION_INACTIVE;
+            } else if ( $this->userCredentials->isVerified() ) {
+                if ( $this->userCredentials->isSessionPaused() ) {
+                    $this->status = self::AUTH_STATUS_PAUSED;
+                } else {
+                    $this->status = self::AUTH_STATUS_OK;
+                    Session::write('AuthUser.credentials.session_last_activity_time', time());
+                }
+            }
+        }
+    }
+    
+    /**
+     * Registra un adaptador para el manejo de inicio y cierre de sesion
+     * @param \PowerOn\Authorization\AuthorizationAdapterInterface $adapter
+     */
+    public function registerAdapter(AuthorizationAdapterInterface $adapter) {
+        $this->adapter = $adapter;
+    }
+    
+    /**
+     * Devuelve el estado de autorización
+     * @return int
+     */
+    public function getStatus() {
+        return $this->status;
     }
     
     /**
@@ -105,232 +136,191 @@ class Authorization {
      * @return UserCredentials
      */
     public function getUserCredentials() {
-        return $this->_user_logged;
+        return $this->userCredentials;
     }
     
     /**
-     * Autentifica y devuelve las credencials del usuario en base al token recibido
-     * @param string $token Token único de la sesión activa del usuario
+     * Devuelve las credenciales del sector verificado
+     * @return SectorCredentials
      */
-    public function setUserLogged( $token ) {
-        /* @var $pdo \PDO */
-        $pdo = $this->_config['db_pdo'];
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        
-        $find_user = $pdo->prepare(sprintf('SELECT * FROM `%s` '
-                . 'WHERE `%s` = :token', $this->_config['db_table_users'], $this->_config['db_field_token']));
-        $find_user->execute([
-            'token' => $token,
-        ]);
-        
-        $user = $find_user->fetchObject();
-        
-        if ( !$user || (new Moment())->isAfter($user->{ $this->_config['db_field_token_time'] }) ) {
-            return FALSE;
-        }
-        
-        if ( !property_exists($user, $this->_config['db_field_access_level']) ) {
-            throw new \InvalidArgumentException(sprintf('No existe el campo (%s) en la tabla (%s),'
-                    . ' debe configurar correctamente el valor (db_field_access_level) del autorizador.', 
-                    $this->_config['db_field_access_level'], $this->_config['db_table_users']));
-        }
-        
-        $this->_user_logged = new UserCredentials($user->{ $this->_config['db_field_user_mail'] }, NULL, 
-                $user->{ $this->_config['db_field_access_level'] }, $user->{ $this->_config['db_field_id'] });
+    public function getSectorCredentials() {
+        return $this->sectorCredentials;
+    }
+
+    /**
+     * Bloquea la sesión del usuario sin eliminarla
+     * @return bool
+     */
+    public function pause() {
+        $this->status = self::AUTH_STATUS_PAUSED;
+        Session::write('AuthUser.credentials.session_paused', TRUE);
+        return $this->adapter->pauseSession();
     }
     
     /**
-     * Inicia sesión a un usuario especificando sus credenciales
+     * Vuelve con la última sesión activa
+     * @return bool
+     */
+    public function resume() {
+        if ( $this->status = self::AUTH_STATUS_PAUSED && $this->userCredentials->isVerified() ) {
+            $this->status = self::AUTH_STATUS_OK;
+            Session::write('AuthUser.credentials.session_paused', FALSE);
+            Session::write('AuthUser.credentials.session_last_activity_time', time());
+            return $this->adapter->resumeSession();
+        }
+        
+        return FALSE;
+    }
+    
+    /**
+     * Inicia sesión a un usuario especificando sus credenciales utilizando un adaptador específico
+     * El adaptador debe utilizar la interface provista y su método login debe retornar una credencial de usuario
+     * o FALSE en caso de error
      * @param \PowerOn\Authorization\Credentials $credentials
      * @return integer Devuelve el token generado del usuario encontrado
      * @throws AuthorizationException
      * @throws \LogicException
      */
     public function login(UserCredentials $credentials) {
-        $login_count = (key_exists('login_count', $_SESSION) ? $_SESSION['login_count'] : $this->_config['login_error_max_chances']);
-        $login_count_time = key_exists('login_count_time', $_SESSION) ? $_SESSION['login_count_time'] : NULL;
+        $loginCount = (Session::exist('login_count') ? Session::read('login_count') : $this->config['login_error_max_chances']);
+        $loginCountTime = Session::exist('login_count_time') ? Session::read('login_count_time') : NULL;
 
-        if ( $login_count <= 0 ) {
-            if ( $login_count_time === NULL ) {
-                $moment = new Moment('now');
-                $moment->addSeconds($this->_config['login_error_wait_time']);
-                $_SESSION['login_count_time'] = $moment->format();
-                $login_count_time = $_SESSION['login_count_time'];
+        if ( $loginCount <= 0 ) {
+            if ( $loginCountTime === NULL ) {
+                $time = time();
+                $time += $this->config['login_error_wait_time'];
+                Session::write('login_count_time', $time);
+                $loginCountTime = $_SESSION['login_count_time'];
             }
             
-            $login_time = new Moment($login_count_time);
-
-            if ( $login_time->isAfter('now') ) {
-                throw new AuthorizationException(sprintf('login_error_max_chances', $this->_config['login_error_max_chances']), 3,
-                        ['seconds' => $login_time->fromNow()->getSeconds() * -1]);
+            if ( $loginCountTime > time() ) {
+                throw new AuthorizationException(
+                    sprintf('login_error_max_chances', $this->config['login_error_max_chances']), 3,
+                    ['seconds' => $loginCountTime]
+                );
             } else {
-                unset($_SESSION['login_count_time']);
-                unset($_SESSION['login_count']);
+                Session::remove('login_count_time');
+                Session::remove('login_count');
             }
         }
         
-        $valid_credentials = $credentials->validate( $this->_config );
-        if ( $valid_credentials !== TRUE )  {
-            throw new AuthorizationException('invalid_credentials', 1, ['errors' => $valid_credentials]);
+        if ( !$this->adapter ){
+            throw new \LogicException('Debe establecer un adaptador que implemente la interface '
+                    . '\PowerOn\Authorization\AuthorizationAdapterInterface');
         }
         
-        if ( !$this->_config['db_pdo'] instanceof \PDO ){
-            throw new \LogicException('Debe configurar la base de datos a utilizar con el par&aacute;metro (db_pdo)');
+        $userCredentials = $this->adapter->login($credentials);
+        
+        if ( !$userCredentials instanceof UserCredentials || !$userCredentials->isVerified() ) {
+            Session::write('login_count', Session::exist('login_count')
+                ? Session::read('login_count') - 1 
+                : $this->config['login_error_max_chances']
+            );
+            $this->status = self::AUTH_STATUS_USER_NOT_FOUND;
+            throw new AuthorizationException('user_not_found', 2, ['chances' => Session::read('login_count')]);
         }
         
-        /* @var $pdo \PDO */
-        $pdo = $this->_config['db_pdo'];
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        if ( $this->config['login_check_ban'] ) {
+            if ( $userCredentials->banned ) {
+                $this->status = self::AUTH_STATUS_USER_ERROR;
+                throw new AuthorizationException('banned_account', 10);
+            }
+        }
+        $userCredentials->setSessionStartTime(time());
+        $this->userCredentials = $userCredentials;
         
-        $find_user = $pdo->prepare(sprintf('SELECT * FROM `%s` '
-                . 'WHERE `%s` = :value_user_mail', $this->_config['db_table_users'], $this->_config['db_field_user_mail']));
-        $find_user->execute([
-            'value_user_mail' => $credentials->username,
+        
+        Session::write('AuthUser.data', $userCredentials->getUserData());
+
+        Session::push('AuthUser.credentials', [
+            'username' => $userCredentials->username,
+            'access_level' => $userCredentials->access_level,
+            'banned' => $userCredentials->banned,
+            'session_last_activity_time' => time(),
+            'session_start_time' => time(),
+            'session_paused' => FALSE
         ]);
-        $user = $find_user->fetchObject();
-
-        if ( !$user || ($user && !$this->test($credentials->password, $user->password)) ) {
-            $_SESSION['login_count'] = key_exists('login_count', $_SESSION) ? $_SESSION['login_count'] - 1 : 
-                $this->_config['login_error_max_chances'];
-            
-            throw new AuthorizationException('user_not_found', 2, ['chances' => $_SESSION['login_count']]);
-        }
-        
-        if ( $this->_config['login_check_ban'] ) {
-            if ( !property_exists($user, $this->_config['db_field_banned']) ) {
-                throw new \InvalidArgumentException(sprintf('La tabla (%s) no tiene el campo (%s) requerido',
-                        $this->_config['db_table_users'], $this->_config['db_field_banned']));
-            }
-            
-            if ( $this->_config['db_field_banned_date'] && !property_exists($user, $this->_config['db_field_banned_date']) ) {
-                throw new \InvalidArgumentException(sprintf('La tabla (%s) no tiene el campo (%s) requerido, si no necesita realizar esta'
-                        . 'verificaci&oacute;n, puede establecer el valor del campo en NULL dentro de la configuraci&oacute;n del autorizador.',
-                        $this->_config['db_table_users'], $this->_config['db_field_banned_date']));
-            }
-            
-            if ( $this->_config['db_field_banned_date'] && $user->{ $this->_config['db_field_banned_date'] }) {
-                $banned_date = new Moment($this->user->{ $this->_config['db_field_banned_date'] });
-            } else {
-                $banned_date = NULL;
-            }
-            
-            if ( $this->_config['db_field_banned'] && $user->{ $this->_config['db_field_banned'] } 
-                    && (!$banned_date || $banned_date->isAfter()) ) {
-                throw new AuthorizationException('banned_account', 10, ['banned_date' => $banned_date ? $banned_date->format() : NULL]);
-            }
-        }
-
-        $secret_token = $this->crypt(uniqid('scrttkn'));
-            
-        $update_token = $pdo->prepare(sprintf('UPDATE `%s` SET `%s` = :token, `%s` = :token_expire '
-                . ' WHERE `id` = :user_id', $this->_config['db_table_users'], $this->_config['db_field_token'],
-                $this->_config['db_field_token_time']));
-
-        $update_token->execute([
-            'token' => $secret_token,
-            'token_expire' => (new Moment())->addSeconds( $this->_config['login_session_time'] )->format(\DateTime::ISO8601),
-            'user_id' => $user->id
-        ]);
-        
-        $this->_logged = TRUE;
-        
-        return $secret_token;
+       
+        $this->status = self::AUTH_STATUS_OK;
     }
     
-    
+    public function logout() {
+        if ( !$this->adapter ){
+            throw new \LogicException('Debe establecer un adaptador que implemente la interface '
+                    . '\PowerOn\Authorization\AuthorizationAdapterInterface');
+        }
+        Session::destroy();
+        $this->status = self::AUTH_STATUS_USER_NOT_FOUND;
+        return $this->adapter->logout();
+    }
     
     /**
      * Verifica si un usuario inició sesión correctamente
      * @return boolean
      */
-    public function isLogged() {
-        return $this->_user_logged !== NULL;
+    public function isValid() {
+        return $this->status === self::AUTH_STATUS_OK;
+    }
+    
+    public function isPaused(){
+        return $this->status === self::AUTH_STATUS_PAUSED;
     }
     
     /**
      * Autoriza el acceso a un modulo indicado
-     * @param SectorCredentials $sector Credenciales del sector a autorizar
+     * @param string $url Url a verificar
+     * @param mixed $s_ [optional]
      * @return boolean True en caso de exito
      * @throws AuthorizerException
      */
-    public function sector(SectorCredentials $sector) {
-        //LOGIN REQUIRED
-        if ( $sector->require_level > 0 && !$this->isLogged() ) {
-            throw new AuthorizationException('sector_require_login', 4);
+    public function sector($url) {
+        $params = func_get_args();
+        $params[0] = $this->userCredentials;
+        
+        $sectorCredentials = $this->findSectorCredentials($url);
+        $this->sectorCredentials = $sectorCredentials;
+        
+        if ( $sectorCredentials && !$this->isValid() ) {
+            return FALSE;
         }
         
-        if ( $this->isLogged() ) {
-            //AUTHORIZED SECTOR
-            if ( $this->_user_logged->allowed_sectors && !in_array($sector->name, $this->_user_logged->allowed_sectors) ) {
-                throw new AuthorizationException('sector_require_access', 2, ['user_allowed_sectors' => $this->_user_logged->allowed_sectors]);
+        if ( $sectorCredentials && $this->isValid() ) {
+            if ($sectorCredentials->access_level && $this->userCredentials->access_level < $sectorCredentials->access_level) {
+                $this->status = self::AUTH_STATUS_SECTOR_LOW_ACCESS_LEVEL;
+                return FALSE;
             }
-
-            //AUTHORIZED LEVEL SECTOR
-            if ( $sector->require_level && $this->_user_logged->access_level < $sector->require_level ) {
-                throw new AuthorizationException('sector_require_access', 5, ['user_access_level' => $this->_user_logged->access_level]);
-            }
-        }
-        //AJAX_MODE
-        $http_request = filter_input(INPUT_SERVER, 'HTTP_X_REQUESTED_WITH', FILTER_SANITIZE_STRING);
-        $ajax_request = ( !empty($http_request) && strtolower($http_request) == 'xmlhttprequest' ) ? TRUE : FALSE;
-        $post_request = filter_input(INPUT_SERVER, 'METHOD', FILTER_SANITIZE_STRING) == 'POST' ? TRUE : FALSE ;
-        
-        if ( $sector->ajax_access_mode == SectorCredentials::AJAX_ACCESS_DENIED && $ajax_request ) {
-            throw new AuthorizationException('sector_ajax_error', 6, array('module' => $sector));
-        } elseif ( $sector->ajax_access_mode == SectorCredentials::AJAX_ACCESS_REQUIRED && !$ajax_request ) {
-            throw new AuthorizationException('sector_ajax_required', 7);
-        } elseif ( $sector->ajax_access_mode == SectorCredentials::AJAX_ACCESS_ALLOW_POST && $post_request && !$ajax_request ) {
-            throw new AuthorizationException('sector_ajax_post', 8);
+            
+            if ($sectorCredentials->allowed && !call_user_func_array($sectorCredentials->allowed, $params)) {
+                $this->status = self::AUTH_STATUS_SECTOR_NOT_ALLOWED;
+                return FALSE;
+            }            
         }
         
         return TRUE;
     }
     
     /**
-     * Encripta una cadena
-     * @param string $words La cadena a encriptar
-     * @return string La cadena encriptada
-    */
-    private function crypt($words) {
-       $encrypted = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, 
-               md5($this->_config['crypt_password']), $words, MCRYPT_MODE_CBC, md5(md5($this->_config['crypt_password']))));
-       return $encrypted;
+     * Busca un permiso establecido
+     * @param string $url  URL solicitada
+     * @return \PowerOn\Authorization\SectorCredentials
+     */
+    private function findSectorCredentials($url) {
+        $matches = array_filter(array_keys($this->permissions), function($pattern) use ($url) { 
+            $filtered = '/^' . str_replace(['/', '/*'], ['\/', '/?[a-zA-Z0-9\/]*'], $pattern) . '$/';
+            return preg_match($filtered, $url);
+        });
 
-    }
-    /**
-     * Desencripta una cadena
-     * @param string $words La cadena a desencriptar
-     * @return string la cadena desencriptada
-    */
-    private function decrypt($words){
-        $decrypted = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, md5($this->_config['crypt_password']),
-                base64_decode($words), MCRYPT_MODE_CBC, md5(md5($this->_config['crypt_password']))), "\0");
-       return $decrypted;
-    }
-
-    /**
-     * Encripta un password utilizando las funciones de php
-     * @param String $password el password a encriptar
-     * @param Integer $digit el numero de digitos
-     * @return String Devuelve el password encriptado
-    */
-    private function blowfish($password, $digit = 7) {
-       $set_salt = './1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-       $salt = sprintf('$2a$%02d$', $digit);
-       for($i = 0; $i < 22; $i++) {
-           $salt .= $set_salt[mt_rand(0, 63)];
-       }
-
-       return crypt($password, $salt);
-    }
-
-    /**
-     * Comprueba que el password sea correcto utilizando el metodo crypt
-     * @param String $input El password enviado por el usuario
-     * @param String $saved El password guardado en db
-     * @return Boolean Devuelve True en caso de coincidir o False en caso contrario
-    */
-    private function test($input, $saved) {
-       return crypt($input, $saved) == $saved;
+        $name = $matches ? end($matches) : FALSE;
+        $permission = $name ? $this->permissions[$name] : FALSE;
+        
+        return $permission 
+            ? new SectorCredentials(
+                $name,
+                key_exists('access_level', $permission) ? $permission['access_level'] : NULL,
+                key_exists('allowed', $permission) ? $permission['allowed'] : NULL,
+                key_exists('extension', $permission) ? $permission['extension'] : NULL
+            )
+            : FALSE
+        ;
     }
 }

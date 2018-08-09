@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (C) PowerOn Sistemas
  *
@@ -19,8 +18,6 @@
 
 namespace PowerOn\Authorization;
 
-use PowerOn\Validation\Validator;
-
 /**
  * Credentials Credenciales a autorizar
  * @author Lucas Sosa
@@ -28,7 +25,7 @@ use PowerOn\Validation\Validator;
  */
 class SectorCredentials {
     /**
-     * Nombre del sector
+     * Nombre del sector o URL
      * @var string
      */
     public $name;
@@ -36,29 +33,17 @@ class SectorCredentials {
      * Nivel de acceso requerido
      * @var string
      */
-    public $require_level;
+    public $access_level;
     /**
-     * Modo de acceso ajax al sector
-     * @var integer
+     * Función callable que retorna verificación
+     * @var \Closure
      */
-    public $ajax_access_mode;
-    
+    public $allowed;
     /**
-     * Prohibe el acceso mediante peticion ajax
+     * Extension solicitada
+     * @var string
      */
-    const AJAX_ACCESS_DENIED = 0;
-    /**
-     * El sector solo puede ser accedido mediante una petición ajax
-     */
-    const AJAX_ACCESS_REQUIRED = 1;
-    /**
-     * El sector solo recibe datos POST mediante ajax
-     */
-    const AJAX_ACCESS_ALLOW_POST = 2;
-    /**
-     * Permite el acceso mediante una petición ajax de cualquier tipo
-     */
-    const AJAX_ACCESS_ALLOW_ALL = 2;
+    public $extension;
     
     /**
      * Crea una credencial de usuario
@@ -66,47 +51,10 @@ class SectorCredentials {
      * @param integer $require_level Nivel de acceso requerido
      * @param itenger $ajax_access_mode Modo de acceso ajax al sector
      */
-    public function __construct($name = NULL, $require_level = NULL, $ajax_access_mode = NULL) {
+    public function __construct($name = NULL, $require_level = NULL, callable $allowed = NULL, $extension = NULL) {
         $this->name = $name;
-        $this->require_level = $require_level;
-        $this->ajax_access_mode = $ajax_access_mode;
-    }
-    
-    /**
-     * Valida los datos recibidos para crear las 
-     * credenciales del usuario
-     * @param array $config Datos de configuración del autorizador
-     * @return array Devuelve un array con errores encontrados o TRUE si no se encontró ningún error
-     */
-    public function validate(array $config) {
-        $validator = new Validator();
-        
-        $validator->add('name', [
-                ['string_allow', ['alpha', 'low_strips']],
-                ['required', TRUE]
-            ]
-        );
-        
-        $validator->add('require_level', [
-                ['min_val', $config['access_level_min_val']],
-                ['max_val', $config['access_level_max_val']],
-                ['required', TRUE]
-            ]
-        );
-        
-        $validator->add('ajax_access_mode', [
-                ['min_val', 0],
-                ['max_val', 2],
-                ['string_allow', ['numbers']]
-            ]
-        );
-        
-        $validator->validate([
-            'name' => $this->name,
-            'require_level' => $this->require_level,
-            'ajax_access_mode' => $this->ajax_access_mode
-        ]);
-        
-        return $validator->getErrors() ? $validator->getErrors() : TRUE;
+        $this->access_level = $require_level;
+        $this->allowed = $allowed;
+        $this->extension = $extension;
     }
 }
