@@ -38,8 +38,7 @@ $auth = new PowerOn\Authorization\Authorization($config, $permissions);
 
 ```
 
-### Ejemplo de autenticación de usarios
-Ejemplo básico de autenticación de usuarios
+### Ejemplo de autenticación de usuarios
 
 #### Adaptador de sesiones
 Adaptador de ejemplo
