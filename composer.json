@@ -4,7 +4,7 @@
     "description": "Servicio de autorizacion de usuarios y sectores.",
     "keywords": ["auth", "login", "user"],
     "homepage": "https://github.com/poweronsystem/authorizationservice",
-    "license": "GPL",
+    "license": "MIT",
     "authors": [
         {
             "name": "Lucas Sosa",
