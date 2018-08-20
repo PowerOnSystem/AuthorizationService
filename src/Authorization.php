@@ -75,7 +75,9 @@ class Authorization {
      * <tr><td>login_error_wait_time</td><td>(int) 60</td> <td>Segundos que debe esperar antes de volver a intentar iniciar sesión 
      * luego de exceder el límite de errores</td></tr>
      * <tr><td>login_check_ban</td><td>(bool) FALSE</td> <td>Habilita la verificación de usuario baneado</td></tr>
-     * <tr><td>login_session_time</td><td>(int) 3600</td> <td>Cantidad de segundos que dura una sesión</td></tr>
+     * <tr><td>login_session_time</td><td>(int) 28800</td> <td>Cantidad de segundos que dura una sesión</td></tr>
+     * <tr><td>login_session_inactive_time</td><td>(int) 1800</td> <td>Cantidad de segundos que dura una sesión</td></tr>
+     * <tr><td>strict_mode</td><td>(bool) FALSE</td> <td>En modo estricto las url que no se encuentren en la lista de permisos </td></tr>
      * <tr><td>login_session_inactive_time</td><td>(int) 1800</td> <td>Cantidad de segundos que dura una sesión</td></tr>
      * </table>
      * 
@@ -86,8 +88,9 @@ class Authorization {
             'login_error_max_chances' => 5,
             'login_error_wait_time' => 60,
             'login_check_ban' => FALSE,
-            'login_session_time' => 3600,
-            'login_session_inactive_time' => 1800
+            'login_session_time' => 28800,
+            'login_session_inactive_time' => 3600,
+            'strict_mode' => FALSE
         ];
 
         $this->permissions = $permissions;
@@ -109,7 +112,7 @@ class Authorization {
                     $this->status = self::AUTH_STATUS_PAUSED;
                 } else {
                     $this->status = self::AUTH_STATUS_OK;
-                    Session::write('AuthUser.credentials.session_last_activity_time', time());
+                    Session::merge('AuthUser.credentials.session_last_activity_time', time());
                 }
             }
         }
@@ -153,7 +156,7 @@ class Authorization {
      */
     public function pause() {
         $this->status = self::AUTH_STATUS_PAUSED;
-        Session::write('AuthUser.credentials.session_paused', TRUE);
+        Session::merge('AuthUser.credentials.session_paused', TRUE);
         return $this->adapter->pauseSession();
     }
     
@@ -164,8 +167,8 @@ class Authorization {
     public function resume() {
         if ( $this->status = self::AUTH_STATUS_PAUSED && $this->userCredentials->isVerified() ) {
             $this->status = self::AUTH_STATUS_OK;
-            Session::write('AuthUser.credentials.session_paused', FALSE);
-            Session::write('AuthUser.credentials.session_last_activity_time', time());
+            Session::merge('AuthUser.credentials.session_paused', FALSE);
+            Session::merge('AuthUser.credentials.session_last_activity_time', time());
             return $this->adapter->resumeSession();
         }
         
@@ -239,18 +242,18 @@ class Authorization {
         $userCredentials->setSessionStartTime(time());
         $this->userCredentials = $userCredentials;
         
-        
-        Session::write('AuthUser.data', $userCredentials->getUserData());
-
-        Session::push('AuthUser.credentials', [
-            'username' => $userCredentials->username,
-            'access_level' => $userCredentials->access_level,
-            'banned' => $userCredentials->banned,
-            'session_last_activity_time' => time(),
-            'session_start_time' => time(),
-            'session_paused' => FALSE
-        ]);
-       
+        $AuthUser = [
+            'data' => $userCredentials->getUserData(),
+            'credentials' => [
+                'username' => $userCredentials->username,
+                'access_level' => $userCredentials->access_level,
+                'banned' => $userCredentials->banned,
+                'session_last_activity_time' => time(),
+                'session_start_time' => time(),
+                'session_paused' => FALSE
+            ]
+        ];
+        Session::write('AuthUser', $AuthUser);
         $this->status = self::AUTH_STATUS_OK;
     }
     
@@ -289,8 +292,12 @@ class Authorization {
         
         $sectorCredentials = $this->findSectorCredentials($url);
         $this->sectorCredentials = $sectorCredentials;
+        if ( !$sectorCredentials && $this->config['strict_mode'] ) {
+            $this->status = self::AUTH_STATUS_SECTOR_NOT_ALLOWED;
+            return FALSE;
+        }
         
-        if ( $sectorCredentials && !$this->isValid() ) {
+        if ( $sectorCredentials && !$this->isValid() && !$this->config['strict_mode']) {
             return FALSE;
         }
         
@@ -326,9 +333,8 @@ class Authorization {
         return $permission 
             ? new SectorCredentials(
                 $name,
-                key_exists('access_level', $permission) ? $permission['access_level'] : NULL,
-                key_exists('allowed', $permission) ? $permission['allowed'] : NULL,
-                key_exists('extension', $permission) ? $permission['extension'] : NULL
+                is_array($permission) && key_exists('access_level', $permission) ? $permission['access_level'] : NULL,
+                is_array($permission) && key_exists('allowed', $permission) ? $permission['allowed'] : NULL
             )
             : FALSE
         ;

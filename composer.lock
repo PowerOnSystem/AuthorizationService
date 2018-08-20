@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1170aabf9b4f46caba23a61f0215b50c",
+    "content-hash": "7e48327dd75d326acba48c405ef3180f",
     "packages": [
         {
             "name": "poweronsystem/webutility",
-            "version": "v0.1.2",
+            "version": "v0.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PowerOnSystem/WebUtility.git",
-                "reference": "c15a6f3d1268cdf31d24d7825cde5d366caeb23b"
+                "reference": "6a985616a7be518c59d7e1b9fc97b2d956a89c81"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PowerOnSystem/WebUtility/zipball/c15a6f3d1268cdf31d24d7825cde5d366caeb23b",
-                "reference": "c15a6f3d1268cdf31d24d7825cde5d366caeb23b",
+                "url": "https://api.github.com/repos/PowerOnSystem/WebUtility/zipball/6a985616a7be518c59d7e1b9fc97b2d956a89c81",
+                "reference": "6a985616a7be518c59d7e1b9fc97b2d956a89c81",
                 "shasum": ""
             },
             "require": {
@@ -52,7 +52,7 @@
                 "string formatter",
                 "utilities"
             ],
-            "time": "2018-08-09T11:45:51+00:00"
+            "time": "2018-08-20T01:20:55+00:00"
         }
     ],
     "packages-dev": [
@@ -116,16 +116,16 @@
         },
         {
             "name": "poweronsystem/databaseservice",
-            "version": "v0.1.1",
+            "version": "v0.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PowerOnSystem/DataBaseService.git",
-                "reference": "13e2490e142992a19059c50bf63e437b6a96adf8"
+                "reference": "eb5b62cc502d6d9df1eeeafa47e260eb435f0209"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PowerOnSystem/DataBaseService/zipball/13e2490e142992a19059c50bf63e437b6a96adf8",
-                "reference": "13e2490e142992a19059c50bf63e437b6a96adf8",
+                "url": "https://api.github.com/repos/PowerOnSystem/DataBaseService/zipball/eb5b62cc502d6d9df1eeeafa47e260eb435f0209",
+                "reference": "eb5b62cc502d6d9df1eeeafa47e260eb435f0209",
                 "shasum": ""
             },
             "require": {
@@ -161,7 +161,7 @@
                 "pdo",
                 "sql"
             ],
-            "time": "2018-07-27T18:33:08+00:00"
+            "time": "2018-08-17T18:45:16+00:00"
         }
     ],
     "aliases": [],

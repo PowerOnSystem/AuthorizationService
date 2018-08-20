@@ -6,6 +6,7 @@ define('DS', DIRECTORY_SEPARATOR);
 require ROOT . DS . 'vendor' . DS . 'autoload.php';
 
 $permissions = [
+    '/login' => TRUE,
     '/works' => ['access_level' => 1],
     '/works/view/[0-9]+' => ['access_level' => 4],
     '/extruders/*' => ['access_level' => 5],
@@ -15,8 +16,10 @@ $permissions = [
     }]
 ];
 
-$auth = new PowerOn\Authorization\Authorization([], $permissions);
-$service = new PDO(sprintf('mysql:host=%s;dbname=%s;port=%s', 'localhost', 'unitest', 3306), 'root', 'marcos6745');
+$auth = new PowerOn\Authorization\Authorization([
+    'strict_mode' => TRUE
+], $permissions);
+$service = new PDO(sprintf('mysql:host=%s;dbname=%s;port=%s', 'localhost', 'absol', 3306), 'root', '');
 $database = new PowerOn\Database\Model($service);
 $adapter = new App\MainAdapter($database);
 $auth->registerAdapter($adapter);
@@ -81,12 +84,12 @@ try {
     echo '</form>';
     
     
-    if ($auth->getStatus() == PowerOn\Authorization\Authorization::AUTH_STATUS_USER_NOT_FOUND) {
-        echo '<form method="post">';
-            echo '<input type="hidden" name="action" value="join">';
-            echo '<input type="submit" value="login" />';
-        echo '</form>';
-    }
+
+    echo '<form method="post">';
+        echo '<input type="hidden" name="action" value="join">';
+        echo '<input type="submit" value="login" />';
+    echo '</form>';
+    
     
     if ( $auth->getUserCredentials() ) {
         echo '<form method="post">';
@@ -99,6 +102,10 @@ try {
         echo '<form method="post">';
             echo '<input type="hidden" name="action" value="pause">';
             echo '<input type="submit" value="pause" />';
+        echo '</form>';
+        echo '<form method="post">';
+            echo '<input type="hidden" name="action" value="join">';
+            echo '<input type="submit" value="re-login" />';
         echo '</form>';
     }
     
