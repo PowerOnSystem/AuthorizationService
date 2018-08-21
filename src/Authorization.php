@@ -297,7 +297,7 @@ class Authorization {
             return FALSE;
         }
         
-        if ( $sectorCredentials && !$this->isValid() && !$this->config['strict_mode']) {
+        if ( $sectorCredentials && $sectorCredentials->access_level && !$this->isValid() ) {
             return FALSE;
         }
         
